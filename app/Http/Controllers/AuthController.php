@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use App\Mail\PasswordResetMail;
+
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Str;
 
@@ -60,7 +62,11 @@ class AuthController extends Controller
             DB::table('users')->where('email', $reset_password_data)->update([
                 'password' => $hashed_pass
             ]);
-            
+            $details = [
+                'title' => 'Password Reset Mail',
+                'body' => $new_password
+            ];
+            Mail::to($reset_password_data)->send(new PasswordResetMail($details));
             return response([
                 'message' => 'Your password was reset',
                 'new_pass' => $new_password
