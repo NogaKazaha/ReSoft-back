@@ -51,26 +51,48 @@ class AuthController extends Controller
     }
     public function reset_password() {
         $reset_password_data = request()->only(['email']);
-        $new_password = Str::random(10);
-        $hashed_pass = Hash::make($new_password);
+        $email = $reset_password_data['email'];
+        $new_token = Str::random(20);
+        $token_arr = $new_token;
         if(!User::where('email', $reset_password_data)->first()) {
             return response([
                 'message' => 'No user with such email'
             ]);
         }
         else {
-            DB::table('users')->where('email', $reset_password_data)->update([
-                'password' => $hashed_pass
+            DB::table('password_resets')->insert([
+                'email' => $email,
+                'token' => $token_arr
             ]);
             $details = [
                 'title' => 'Password Reset Mail',
-                'body' => $new_password
+                'body' => 'Your link to reset password: http://127.0.0.1:8000/api/auth/reset_password/'.$new_token
             ];
             Mail::to($reset_password_data)->send(new PasswordResetMail($details));
             return response([
-                'message' => 'Your password was reset',
-                'new_pass' => $new_password
+                'message' => 'Your password reset link was sent',
             ]);
         }
+    }
+    public function confirmation_token(Request $request, $id) {
+        $data = DB::table('password_resets')->where('token', $request->token)->first();
+        if (!$data) {
+            return response([
+                'message' => 'Wrong token'
+            ]);
+        }
+        $user = User::where('email', $data->email)->first();
+        if (!$user) {
+            return response([
+                'message' => 'Wrong email'
+            ]);
+        }
+        $user->password = Hash::make($request->input('password'));
+        $user->update();
+        $user = JWTAuth::user();
+        DB::table('password_resets')->where('email', $data->email)->delete();
+        return response([
+            'message' => 'Password changed'
+        ]);
     }
 }
