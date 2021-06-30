@@ -18,6 +18,7 @@ Route::prefix('auth')->group(function() {
     Route::post('/register', 'App\Http\Controllers\AuthController@register');
     Route::post('/login', 'App\Http\Controllers\AuthController@login');
     Route::post('/logout', 'App\Http\Controllers\AuthController@logout');
+    Route::post('/reset_password', 'App\Http\Controllers\AuthController@reset_password');
 });
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {

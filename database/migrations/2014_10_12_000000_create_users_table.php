@@ -17,7 +17,6 @@ class CreateUsersTable extends Migration
             $table->string('avatar')->default('avatar/default.jpg');
             $table->integer('rating')->default(0);
             $table->enum('role', ['user' , 'admin'])->default('user');
-            $table->rememberToken();
             $table->timestamps();
         });
     }
