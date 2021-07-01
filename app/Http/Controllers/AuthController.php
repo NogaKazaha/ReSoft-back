@@ -36,6 +36,9 @@ class AuthController extends Controller
             ], 400);
         }
         else {
+            DB::table('users')->where('username', $login_data['username'])->update([
+                'remember_token' => $token
+            ]);
             return response([
                 'message' => 'Succesfuly loged in',
                 'token' => $token,
@@ -44,10 +47,21 @@ class AuthController extends Controller
     }
     public function logout()
     {
-        JWTAuth::invalidate(JWTAuth::getToken());
-        return response([
-            'message' => 'Logged out'
-        ]);
+        $user = JWTAuth::toUser(JWTAuth::getToken());
+        if(!$user) {
+            return response([
+                'message' => 'User is not logged in'
+            ]);
+        }
+        else {
+            JWTAuth::invalidate(JWTAuth::getToken());
+            DB::table('users')->where('remember_token', JWTAuth::getToken())->update([
+                'remember_token' => ''
+            ]);
+            return response([
+                'message' => 'Logged out'
+            ]);
+        }
     }
     public function reset_password() {
         $reset_password_data = request()->only(['email']);
