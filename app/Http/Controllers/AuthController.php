@@ -74,7 +74,7 @@ class AuthController extends Controller
             ]);
         }
     }
-    public function confirmation_token(Request $request, $id) {
+    public function confirmation_token(Request $request, $token) {
         $data = DB::table('password_resets')->where('token', $request->token)->first();
         if (!$data) {
             return response([
