@@ -67,7 +67,6 @@ class AuthController extends Controller
         $reset_password_data = request()->only(['email']);
         $email = $reset_password_data['email'];
         $new_token = Str::random(20);
-        $token_arr = $new_token;
         if(!User::where('email', $reset_password_data)->first()) {
             return response([
                 'message' => 'No user with such email'
@@ -76,7 +75,7 @@ class AuthController extends Controller
         else {
             DB::table('password_resets')->insert([
                 'email' => $email,
-                'token' => $token_arr
+                'token' => $new_token
             ]);
             $details = [
                 'title' => 'Password Reset Mail',

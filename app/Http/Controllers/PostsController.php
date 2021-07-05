@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Post;
 use Illuminate\Http\Request;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class PostsController extends Controller
 {
@@ -15,7 +16,20 @@ class PostsController extends Controller
 
     public function store(Request $request)
     {
-        $create_post = Post::create($request->all());
+        $user = JWTAuth::toUser(JWTAuth::getToken());
+        if(!$user) {
+            return response([
+                'message' => 'User is not logged in'
+            ]);
+        }
+        $title = $request->input('title');
+        $content = $request->input('content');
+        $creditianals = [
+            'user_id' => $user->id,
+            'title' => $title,
+            'content' => $content
+        ];
+        $create_post = Post::create($creditianals);
         return $create_post;
     }
 
