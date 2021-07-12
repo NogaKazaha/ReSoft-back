@@ -40,4 +40,10 @@ class CategoriesController extends Controller
         $destroy_category = Category::destroy($id);
         return $destroy_category;
     }
+
+    public function get_post_categories($id) {
+        $categories = DB::table('posts')->where('id', $id)->pluck('categories');
+        $categories_arr = explode(' ',$categories);
+        return $categories_arr;
+    }
 }

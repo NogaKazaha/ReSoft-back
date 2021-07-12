@@ -22,6 +22,14 @@ Route::prefix('auth')->group(function() {
     Route::post('/reset_password/{token}', 'App\Http\Controllers\AuthController@confirmation_token');
 });
 
+Route::prefix('posts')->group(function() {
+    Route::get('/show_all', 'App\Http\Controllers\PostsController@index');
+    Route::get('/show/{id}', 'App\Http\Controllers\PostsController@show');
+    Route::post('/create', 'App\Http\Controllers\PostsController@store');
+    Route::delete('/delete/{id}', 'App\Http\Controllers\PostsController@destroy');
+    Route::patch('/update/{id}', 'App\Http\Controllers\PostsController@update');
+});
+
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });

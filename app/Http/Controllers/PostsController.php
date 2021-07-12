@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
+
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
@@ -16,21 +18,26 @@ class PostsController extends Controller
 
     public function store(Request $request)
     {
-        $user = JWTAuth::toUser(JWTAuth::getToken());
+        $user = $this->checkLogIn($request);
         if(!$user) {
             return response([
                 'message' => 'User is not logged in'
             ]);
         }
-        $title = $request->input('title');
-        $content = $request->input('content');
-        $creditianals = [
-            'user_id' => $user->id,
-            'title' => $title,
-            'content' => $content
-        ];
-        $create_post = Post::create($creditianals);
-        return $create_post;
+        else {
+            $user = JWTAuth::toUser(JWTAuth::getToken());
+            $title = $request->input('title');
+            $content = $request->input('content');
+            $categories = $request->input('categories');
+            $creditianals = [
+                'user_id' => $user->id,
+                'title' => $title,
+                'content' => $content,
+                'categories' => $categories
+            ];
+            $create_post = Post::create($creditianals);
+            return $create_post;
+        } 
     }
 
     public function show($id)
@@ -41,14 +48,51 @@ class PostsController extends Controller
 
     public function update(Request $request, $id)
     {
-       $post = Post::find($id);
-       $post->update($request->all());
-       return $post; 
+        $user = $this->checkLogIn($request);
+        if(!$user) {
+            return response([
+                'message' => 'User is not logged in'
+            ]);
+        }
+        $user = JWTAuth::toUser(JWTAuth::getToken());
+        $user_id = $user->id;
+        $creator_id = DB::table('posts')->where('id', $id)->value('user_id');
+        if($user_id != $creator_id) {
+            return response([
+                'message' => 'You can not update this post'
+            ]);
+        }
+        else if($user_id == $creator_id || $this->checkAdmin($request)) {
+            $post = Post::find($id);
+            $post->update($request->all());
+            return response([
+                'message' => 'Post update',
+                'post' => $post
+            ]);
+        } 
     }
 
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
-        $destroy_post = Post::destroy($id);
-        return $destroy_post;
+        $user = $this->checkLogIn($request);
+        if(!$user) {
+            return response([
+                'message' => 'User is not logged in'
+            ]);
+        }
+        $user = JWTAuth::toUser(JWTAuth::getToken());
+        $user_id = $user->id;
+        $creator_id = DB::table('posts')->where('id', $id)->value('user_id');
+        if($user_id != $creator_id) {
+            return response([
+                'message' => 'You can not delete this post'
+            ]);
+        }
+        else if($user_id == $creator_id || $this->checkAdmin($request)) {
+            Post::destroy($id);
+            return response([
+                'message' => 'Post deleted'
+            ]);
+        }   
     }
 }
