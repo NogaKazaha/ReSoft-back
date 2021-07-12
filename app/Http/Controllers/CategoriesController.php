@@ -18,8 +18,19 @@ class CategoriesController extends Controller
 
     public function store(Request $request)
     {
-        $create_category = Category::create($request->all());
-        return $create_category;
+        if($this->checkAdmin($request)) {
+            $create_category = Category::create($request->all());
+            return response([
+                'message' => 'Category created',
+                'category' => $create_category
+            ]);
+        }
+        else {
+            return response([
+                'message' => 'You can not create categories'
+            ]);
+        }
+        
     }
 
     public function show($id)
@@ -30,20 +41,41 @@ class CategoriesController extends Controller
 
     public function update(Request $request, $id)
     {
-        $update_category = Category::find($id);
-        $update_category->update($request->all());
-        return $update_category;
+        if($this->checkAdmin($request)) {
+            $update_category = Category::find($id);
+            $update_category->update($request->all());
+            return response([
+                'message' => 'Category updated',
+                'category' => $update_category
+            ]);
+        }
+        else {
+            return response([
+                'message' => 'You can not update categories'
+            ]);
+        }
     }
 
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
-        $destroy_category = Category::destroy($id);
-        return $destroy_category;
+        if($this->checkAdmin($request)) {
+            Category::destroy($id);
+            return response([
+                'message' => 'Category deleted'
+            ]);
+        }
+        else {
+            return response([
+                'message' => 'You can not delete category'
+            ]);
+        }
     }
 
     public function get_post_categories($id) {
         $categories = DB::table('posts')->where('id', $id)->pluck('categories');
         $categories_arr = explode(' ',$categories);
-        return $categories_arr;
+        return response([
+            'categories' => $categories_arr
+        ]);
     }
 }

@@ -28,6 +28,15 @@ Route::prefix('posts')->group(function() {
     Route::post('/create', 'App\Http\Controllers\PostsController@store');
     Route::delete('/delete/{id}', 'App\Http\Controllers\PostsController@destroy');
     Route::patch('/update/{id}', 'App\Http\Controllers\PostsController@update');
+    Route::get('/{id}/categories', 'App\Http\Controllers\CategoriesController@get_post_categories');
+});
+
+Route::prefix('categories')->group(function() {
+    Route::get('/show_all', 'App\Http\Controllers\CategoriesController@index');
+    Route::get('/show/{id}', 'App\Http\Controllers\CategoriesController@show');
+    Route::post('/create', 'App\Http\Controllers\CategoriesController@store');
+    Route::delete('/delete/{id}', 'App\Http\Controllers\CategoriesController@destroy');
+    Route::patch('/updae/{id}', 'App\Http\Controllers\CategoriesController@update');
 });
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
