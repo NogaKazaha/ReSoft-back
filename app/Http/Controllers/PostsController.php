@@ -36,7 +36,10 @@ class PostsController extends Controller
                 'categories' => $categories
             ];
             $create_post = Post::create($creditianals);
-            return $create_post;
+            return response([
+                'message' => 'Post created',
+                'post' => $create_post
+            ]);
         } 
     }
 

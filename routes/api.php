@@ -36,7 +36,15 @@ Route::prefix('categories')->group(function() {
     Route::get('/show/{id}', 'App\Http\Controllers\CategoriesController@show');
     Route::post('/create', 'App\Http\Controllers\CategoriesController@store');
     Route::delete('/delete/{id}', 'App\Http\Controllers\CategoriesController@destroy');
-    Route::patch('/updae/{id}', 'App\Http\Controllers\CategoriesController@update');
+    Route::patch('/update/{id}', 'App\Http\Controllers\CategoriesController@update');
+});
+
+Route::prefix('comments')->group(function() {
+    Route::get('/show_all', 'App\Http\Controllers\CommentsController@index');
+    Route::get('/show/{id}', 'App\Http\Controllers\CommentsController@show');
+    Route::post('{id}/create', 'App\Http\Controllers\CommentsController@store');
+    Route::delete('/delete/{id}', 'App\Http\Controllers\CommentsController@destroy');
+    Route::patch('/update/{id}', 'App\Http\Controllers\CommentsController@update');
 });
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
