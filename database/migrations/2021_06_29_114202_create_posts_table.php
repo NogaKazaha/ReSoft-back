@@ -15,6 +15,7 @@ class CreatePostsTable extends Migration
             $table->string('content');
             $table->enum('status', ['active', 'inactive'])->default('active');
             $table->string('categories');
+            $table->integer('rating')->default(0);
             $table->foreign('user_id')->references('id')->on('users')->onUpdate('cascade')->onDelete('cascade');
             $table->timestamps();
         });

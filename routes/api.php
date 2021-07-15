@@ -13,7 +13,6 @@ use Illuminate\Support\Facades\Route;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-Route::resource('users', 'App\Http\Controllers\UserController');
 Route::prefix('auth')->group(function() {
     Route::post('/register', 'App\Http\Controllers\AuthController@register');
     Route::post('/login', 'App\Http\Controllers\AuthController@login');
@@ -29,6 +28,7 @@ Route::prefix('posts')->group(function() {
     Route::delete('/delete/{id}', 'App\Http\Controllers\PostsController@destroy');
     Route::patch('/update/{id}', 'App\Http\Controllers\PostsController@update');
     Route::get('/{id}/categories', 'App\Http\Controllers\CategoriesController@get_post_categories');
+    Route::post('/{id}/like', 'App\Http\Controllers\LikesController@create_like_on_post');
 });
 
 Route::prefix('categories')->group(function() {
@@ -42,9 +42,20 @@ Route::prefix('categories')->group(function() {
 Route::prefix('comments')->group(function() {
     Route::get('/show_all', 'App\Http\Controllers\CommentsController@index');
     Route::get('/show/{id}', 'App\Http\Controllers\CommentsController@show');
-    Route::post('{id}/create', 'App\Http\Controllers\CommentsController@store');
+    Route::post('/{id}/create', 'App\Http\Controllers\CommentsController@store');
     Route::delete('/delete/{id}', 'App\Http\Controllers\CommentsController@destroy');
     Route::patch('/update/{id}', 'App\Http\Controllers\CommentsController@update');
+    Route::post('/{id}/like', 'App\Http\Controllers\LikesController@create_like_on_comment');
+    Route::get('/{id}/like', 'App\Http\Controllers\LikesController@get_likes_on_comment');
+});
+
+Route::prefix('users')->group(function() {
+    Route::get('/show_all', 'App\Http\Controllers\UserController@index');
+    Route::get('/show/{id}', 'App\Http\Controllers\UserController@show');
+    Route::post('/create', 'App\Http\Controllers\UserController@store');
+    Route::delete('/delete/{id}', 'App\Http\Controllers\UserController@destroy');
+    Route::patch('/update/{id}', 'App\Http\Controllers\UserController@update');
+    Route::patch('/upload_avatar', 'App\Http\Controllers\UserController@upload_avatar');
 });
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
