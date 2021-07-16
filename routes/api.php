@@ -29,6 +29,8 @@ Route::prefix('posts')->group(function() {
     Route::patch('/update/{id}', 'App\Http\Controllers\PostsController@update');
     Route::get('/{id}/categories', 'App\Http\Controllers\CategoriesController@get_post_categories');
     Route::post('/{id}/like', 'App\Http\Controllers\LikesController@create_like_on_post');
+    Route::get('/{id}/like', 'App\Http\Controllers\LikesController@get_likes_on_post');
+    Route::delete('/{id}/like', 'App\Http\Controllers\LikesController@delete_like_on_post');
 });
 
 Route::prefix('categories')->group(function() {
@@ -47,6 +49,7 @@ Route::prefix('comments')->group(function() {
     Route::patch('/update/{id}', 'App\Http\Controllers\CommentsController@update');
     Route::post('/{id}/like', 'App\Http\Controllers\LikesController@create_like_on_comment');
     Route::get('/{id}/like', 'App\Http\Controllers\LikesController@get_likes_on_comment');
+    Route::delete('/{id}/like', 'App\Http\Controllers\LikesController@delete_like_on_comment');
 });
 
 Route::prefix('users')->group(function() {
