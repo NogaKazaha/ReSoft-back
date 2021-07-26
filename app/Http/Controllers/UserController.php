@@ -88,31 +88,17 @@ class UserController extends Controller
         }
         else {
             $user = JWTAuth::toUser(JWTAuth::getToken());
-            $validator = Validator::make($request->all(), [
-                'image' => 'image|required|mimes:png,jpg,jpeg'
+            $request->validate([
+                'avatar' => 'required|image|mimes:jpeg,png,jpg,gif',
             ]);
-            if ($validator->fails()) {
-                return response([
-                    'message' => 'Not a png or jpg file'
-                ]);
-            }
-            $extension = $request->file('image')->extension();
-            if($extension == 'jpg') {
-                $this->destroy_avatar($user->id, 'png');
-            }
-            if($extension == 'png') {
-                $this->destroy_avatar($user->id, 'jpg');
-            }
-            $file = 'avatar'.$user->id.'.'.$extension;
-            $request->file('image')->storeAs('public/avatars', $file);
-            $user->image = 'avatar' . $user->id.'.'.$extension;
-            $user->save();
-            return response([
-                'message' => 'Avatar uploaded'
+            $extension = $request->avatar->extension();
+            $avatar = $user->id.'.'.$extension;
+            $request->avatar->move(public_path('avatars'), $avatar);
+            $path = 'avatars/'.$avatar;
+            User::whereKey($user->id)->update([
+                'avatar' => $path
             ]);
+            return response()->download(public_path($path));
         }
-    }
-    public function destroy_avatar($id, $extension) {
-        Storage::delete('public/avatars/avatar'.$id.'.'.$extension);
     }
 }

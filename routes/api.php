@@ -58,7 +58,7 @@ Route::prefix('users')->group(function() {
     Route::post('/create', 'App\Http\Controllers\UserController@store');
     Route::delete('/delete/{id}', 'App\Http\Controllers\UserController@destroy');
     Route::patch('/update/{id}', 'App\Http\Controllers\UserController@update');
-    Route::patch('/upload_avatar', 'App\Http\Controllers\UserController@upload_avatar');
+    Route::post('/upload_avatar', 'App\Http\Controllers\UserController@upload_avatar');
 });
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
