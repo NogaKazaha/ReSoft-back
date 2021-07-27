@@ -61,6 +61,12 @@ Route::prefix('users')->group(function() {
     Route::post('/upload_avatar', 'App\Http\Controllers\UserController@upload_avatar');
 });
 
+Route::prefix('favorites')->group(function() {
+    Route::get('/show/{id}', 'App\Http\Controllers\FavoritesController@show_user_favorites');
+    Route::post('/add/{id}', 'App\Http\Controllers\FavoritesController@add_to_favorites');
+    Route::delete('/delete/{id}', 'App\Http\Controllers\FavoritesController@delete_from_favorites');
+});
+
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
