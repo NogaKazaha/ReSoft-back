@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
+use App\Models\Category;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
@@ -29,6 +30,17 @@ class PostsController extends Controller
             $title = $request->input('title');
             $content = $request->input('content');
             $categories = $request->input('categories');
+            $categories_arr = explode(' ',$categories);
+            foreach($categories_arr as $category) {
+                if(Category::where('title', $category)->exists()) {
+                    continue;
+                }
+                $creditianals = [
+                    'title' => $category,
+                    'description' => 'Will be edit soon by admin'
+                ];
+                Category::create($creditianals);
+            }
             $creditianals = [
                 'user_id' => $user->id,
                 'title' => $title,

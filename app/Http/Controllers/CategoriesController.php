@@ -72,7 +72,7 @@ class CategoriesController extends Controller
     }
 
     public function get_post_categories($id) {
-        $categories = DB::table('posts')->where('id', $id)->pluck('categories');
+        $categories = DB::table('posts')->where('id', $id)->value('categories');
         $categories_arr = explode(' ',$categories);
         return response([
             'categories' => $categories_arr
