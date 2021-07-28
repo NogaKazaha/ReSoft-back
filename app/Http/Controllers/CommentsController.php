@@ -9,9 +9,10 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class CommentsController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $all_comments = Comment::all();
+        $all_comments = $this->sort_by($request, $all_comments);
         return $all_comments;
     }
 
@@ -93,5 +94,27 @@ class CommentsController extends Controller
                 'message' => 'Comment deleted'
             ]);
         }
+    }
+    public function sort_by(Request $request, $comments) {
+        if($request->input('sort_by') == 'rating') {
+            if($request->input('order_by') == 'desc') {
+                $sort_by = $comments->sortByDesc('rating');
+            }
+            else {
+                $sort_by = $comments->sortBy('rating');
+            }
+        }
+        else if($request->input('sort_by') == 'date') {
+            if($request->input('order_by') == 'desc') {
+                $sort_by = $comments->sortByDesc('updated_at');
+            }
+            else {
+                $sort_by = $comments->sortBy('updated_at');
+            }
+        }
+        else {
+            $sort_by = $comments;
+        }
+        return $sort_by;
     }
 }
