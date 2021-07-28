@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Reset</title>
+</head>
+<body>
+    <p>
+    Hello, {{$username}}!<br><br>
+    You have new notification on subscribed post!<br>
+    Go ahead and check it: {{$link}}<br>
+    </p>
+</body>
+</html>

@@ -8,6 +8,8 @@ use App\Models\Category;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use App\Models\User;
+use Illuminate\Support\Facades\Mail;
 
 class PostsController extends Controller
 {
@@ -80,6 +82,11 @@ class PostsController extends Controller
         else if($user_id == $creator_id || $this->checkAdmin($request)) {
             $post = Post::find($id);
             $post->update($request->all());
+            $subscribers = DB::table('subscriptions')->where('post_id', $id)->pluck("user_id");
+            foreach($subscribers as $subscriber_id) {
+                $subscriber = User::find($subscriber_id);
+                $this->send_notification($subscriber, $id);
+            }
             return response([
                 'message' => 'Post update',
                 'post' => $post
@@ -109,5 +116,19 @@ class PostsController extends Controller
                 'message' => 'Post deleted'
             ]);
         }   
+    }
+
+    public function send_notification(User $user, $post_id)
+    {
+        $link = 'http://127.0.0.1:8000/api/posts/show/'.$post_id;
+        $data = [
+            'username' => $user->username,
+            'link' => $link
+        ];
+        Mail::send('notification', $data, function ($message) use ($user) {
+            $message->to($user->email);
+            $message->subject('New notification for subscribed post');
+        });
+        return "Notification sent";
     }
 }

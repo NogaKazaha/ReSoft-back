@@ -66,6 +66,11 @@ Route::prefix('favorites')->group(function() {
     Route::post('/add/{id}', 'App\Http\Controllers\FavoritesController@add_to_favorites');
     Route::delete('/delete/{id}', 'App\Http\Controllers\FavoritesController@delete_from_favorites');
 });
+Route::prefix('subscriptions')->group(function() {
+    Route::get('/show/{id}', 'App\Http\Controllers\SubscriptionsController@show_user_subscriptions');
+    Route::post('/add/{id}', 'App\Http\Controllers\SubscriptionsController@add_to_subscriptions');
+    Route::delete('/delete/{id}', 'App\Http\Controllers\SubscriptionsController@delete_from_subscriptions');
+});
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
