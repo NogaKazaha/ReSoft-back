@@ -56,12 +56,12 @@ class CommentsController extends Controller
         $user = JWTAuth::toUser(JWTAuth::getToken());
         $user_id = $user->id;
         $creator_id = DB::table('comments')->where('id', $id)->value('user_id');
-        if($user_id != $creator_id) {
+        if($user_id != $creator_id && !$this->checkAdmin($request)) {
             return response([
                 'message' => 'You can not delete this post'
             ]);
         }
-        else if($user_id == $creator_id || $this->checkAdmin($request)) {
+        else {
             $update_comment = Comment::find($id);
             $update_comment->update($request->all());
             return response([
@@ -82,12 +82,12 @@ class CommentsController extends Controller
         $user = JWTAuth::toUser(JWTAuth::getToken());
         $user_id = $user->id;
         $creator_id = DB::table('comments')->where('id', $id)->value('user_id');
-        if($user_id != $creator_id) {
+        if($user_id != $creator_id && !$this->checkAdmin($request)) {
             return response([
                 'message' => 'You can not delete this post'
             ]);
         }
-        else if($user_id == $creator_id || $this->checkAdmin($request)) {
+        else {
             Comment::destroy($id);
             return response([
                 'message' => 'Comment deleted'

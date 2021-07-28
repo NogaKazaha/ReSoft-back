@@ -13,9 +13,11 @@ use Illuminate\Support\Facades\Mail;
 
 class PostsController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $all_posts = Post::all();
+        $all_posts = $this->sort_by($request, $all_posts);
+        $all_posts = $this->filter_by($request, $all_posts);
         return $all_posts;
     }
 
@@ -74,12 +76,12 @@ class PostsController extends Controller
         $user = JWTAuth::toUser(JWTAuth::getToken());
         $user_id = $user->id;
         $creator_id = DB::table('posts')->where('id', $id)->value('user_id');
-        if($user_id != $creator_id) {
+        if($user_id != $creator_id && !$this->checkAdmin($request)) {
             return response([
                 'message' => 'You can not update this post'
             ]);
         }
-        else if($user_id == $creator_id || $this->checkAdmin($request)) {
+        else {
             $post = Post::find($id);
             $post->update($request->all());
             $subscribers = DB::table('subscriptions')->where('post_id', $id)->pluck("user_id");
@@ -105,12 +107,12 @@ class PostsController extends Controller
         $user = JWTAuth::toUser(JWTAuth::getToken());
         $user_id = $user->id;
         $creator_id = DB::table('posts')->where('id', $id)->value('user_id');
-        if($user_id != $creator_id) {
+        if($user_id != $creator_id && !$this->checkAdmin($request)) {
             return response([
                 'message' => 'You can not delete this post'
             ]);
         }
-        else if($user_id == $creator_id || $this->checkAdmin($request)) {
+        else {
             Post::destroy($id);
             return response([
                 'message' => 'Post deleted'
@@ -129,6 +131,42 @@ class PostsController extends Controller
             $message->to($user->email);
             $message->subject('New notification for subscribed post');
         });
-        return "Notification sent";
+    }
+
+    public function sort_by(Request $request, $posts) {
+        if($request->input('sort_by') == 'rating') {
+            if($request->input('order_by') == 'desc') {
+                $sort_by = $posts->sortByDesc('rating');
+            }
+            else {
+                $sort_by = $posts->sortBy('rating');
+            }
+        }
+        else if($request->input('sort_by') == 'date') {
+            if($request->input('order_by') == 'desc') {
+                $sort_by = $posts->sortByDesc('updated_at');
+            }
+            else {
+                $sort_by = $posts->sortBy('updated_at');
+            }
+        }
+        else {
+            $sort_by = $posts;
+        }
+        return $sort_by;
+    }
+
+    public function filter_by(Request $request, $posts) {
+        if($request->input('filter_by') == 'status'){
+            $filter_by = $posts->filter(function ($post) use ($request) {
+                if ($post->status == $request->input('status')) {
+                    return $post;
+                }
+            });
+        }
+        else {
+            $filter_by = $posts;
+        }
+        return $filter_by;
     }
 }
