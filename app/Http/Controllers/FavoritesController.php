@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Favorites;
+use App\Models\Favorite;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -36,7 +36,7 @@ class FavoritesController extends Controller
                     'user_id' => $user->id,
                     'post_id' => $id
                 ];
-                Favorites::create($creditanals);
+                Favorite::create($creditanals);
                 return response([
                     'message' => 'New Favorite added'
                 ]);
