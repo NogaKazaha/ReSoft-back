@@ -7,6 +7,7 @@ use App\Models\Like;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use Carbon\Carbon;
 
 class LikesController extends Controller
 {
@@ -47,7 +48,9 @@ class LikesController extends Controller
             DB::table('post_likes')->insert([
                 'user_id' => $user->id,
                 'post_id' => $id,
-                'type' => $like
+                'type' => $like,
+                'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
+                'updated_at' => Carbon::now()->format('Y-m-d H:i:s')
             ]);
             return response([
                 'message' => $message
@@ -91,7 +94,9 @@ class LikesController extends Controller
             DB::table('comment_likes')->insert([
                 'user_id' => $user->id,
                 'comment_id' => $id,
-                'type' => $like
+                'type' => $like,
+                'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
+                'updated_at' => Carbon::now()->format('Y-m-d H:i:s')
             ]);
             return response([
                 'message' => $message

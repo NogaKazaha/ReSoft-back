@@ -59,12 +59,14 @@ Route::prefix('users')->group(function() {
     Route::delete('/delete/{id}', 'App\Http\Controllers\UserController@destroy');
     Route::patch('/update/{id}', 'App\Http\Controllers\UserController@update');
     Route::post('/upload_avatar', 'App\Http\Controllers\UserController@upload_avatar');
+    Route::get('/show_avatar/{id}', 'App\Http\Controllers\UserController@download_user_avatar');
 });
 
 Route::prefix('favorites')->group(function() {
     Route::get('/show/{id}', 'App\Http\Controllers\FavoritesController@show_user_favorites');
     Route::post('/add/{id}', 'App\Http\Controllers\FavoritesController@add_to_favorites');
     Route::delete('/delete/{id}', 'App\Http\Controllers\FavoritesController@delete_from_favorites');
+    Route::get('/show_posts', 'App\Http\Controllers\FavoritesController@show_only_favorites');
 });
 Route::prefix('subscriptions')->group(function() {
     Route::get('/show/{id}', 'App\Http\Controllers\SubscriptionsController@show_user_subscriptions');

@@ -10,9 +10,15 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 class FavoritesController extends Controller
 {
     public function show_user_favorites($id) {
-        $favorites = DB::table('favorites')->where('user_id', $id)->get();
+        $all_favorites = [];
+        $username = DB::table('users')->where('id', $id)->value('username');
+        $post_ids = DB::table('favorites')->where('user_id', $id)->pluck('post_id');
+        foreach($post_ids as $id) {
+            $item = DB::table('posts')->where('id', $id)->get();
+            array_push($all_favorites, $item);
+        }
         return response([
-            'Favorites' => $favorites
+            'Favorites of user '.$username => $all_favorites
         ]);
     }
 
@@ -64,5 +70,24 @@ class FavoritesController extends Controller
                 ]);
             }
         }
+    }
+
+    public function show_only_favorites(Request $request) {
+        $user = $this->checkLogIn($request);
+        if(!$user) {
+            return response([
+                'message' => 'User is not logged in'
+            ]);
+        }
+        else {
+            $user = JWTAuth::toUser(JWTAuth::getToken());
+            $all_favorites = [];
+            $post_ids = DB::table('favorites')->where('user_id', $user->id)->pluck('post_id');
+            foreach($post_ids as $id) {
+                $item = DB::table('posts')->where('id', $id)->get();
+                array_push($all_favorites, $item);
+            }
+        }
+        return $all_favorites;
     }
 }

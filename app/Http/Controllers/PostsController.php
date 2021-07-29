@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Models\User;
 use Illuminate\Support\Facades\Mail;
+use Carbon\Carbon;
 
 class PostsController extends Controller
 {
@@ -52,6 +53,16 @@ class PostsController extends Controller
                 'categories' => $categories
             ];
             $create_post = Post::create($creditianals);
+            foreach($categories_arr as $category) {
+                $id = Category::where('title', $category)->value('id');
+                $creditianals = [
+                    'post_id' => $create_post->id,
+                    'category_id' => $id,
+                    'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
+                    'updated_at' => Carbon::now()->format('Y-m-d H:i:s')
+                ];
+                DB::table('posts_categories_ids')->insert($creditianals);
+            }
             return response([
                 'message' => 'Post created',
                 'post' => $create_post
@@ -157,12 +168,25 @@ class PostsController extends Controller
     }
 
     public function filter_by(Request $request, $posts) {
-        if($request->input('filter_by') == 'status'){
+        if($request->input('filter_by') == 'status') {
             $filter_by = $posts->filter(function ($post) use ($request) {
                 if ($post->status == $request->input('status')) {
                     return $post;
                 }
             });
+        }
+        else if($request->input('filter_by') == 'categories') {
+            $filter_by = [];
+            $filter_category = $request->input('category');
+            $category_id = DB::table('categories')->where('title', $filter_category)->value('id');
+            $post_ids = DB::table('posts_categories_ids')->where('category_id', $category_id)->pluck('post_id');
+            foreach($post_ids as $id) {
+                $item = DB::table('posts')->where('id', $id)->get();
+                array_push($filter_by, $item);
+            } 
+        }
+        else if($request->input('filter_by') == 'date') {
+            $filter_by = DB::table('posts')->whereBetween('created_at', [$request->input('from'), $request->input('to')])->get();
         }
         else {
             $filter_by = $posts;

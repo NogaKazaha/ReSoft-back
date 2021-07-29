@@ -48,7 +48,7 @@ class UserController extends Controller
     public function update(Request $request, $id)
     {
         $user = JWTAuth::toUser(JWTAuth::getToken());
-        if($user || $this->checkAdmin($request)) {
+        if($user && $this->checkAdmin($request)) {
             $user = User::find($id);
             $user->update($request->all());
             return response([
@@ -66,7 +66,7 @@ class UserController extends Controller
     public function destroy(Request $request, $id)
     {
         $user = JWTAuth::toUser(JWTAuth::getToken());
-        if($user || $this->checkAdmin($request)) {
+        if($user && $this->checkAdmin($request)) {
             User::destroy($id);
             return response([
                 'message' => 'User succesfuly deleted'
@@ -98,7 +98,11 @@ class UserController extends Controller
             User::whereKey($user->id)->update([
                 'avatar' => $path
             ]);
-            return response()->download(public_path($path));
+            return $this->download_user_avatar($user->id);
         }
+    }
+    public function download_user_avatar($id) {
+        $path = User::where('id', $id)->value('avatar');
+        return response()->download(public_path($path));
     }
 }
