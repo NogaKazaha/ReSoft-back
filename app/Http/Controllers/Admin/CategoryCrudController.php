@@ -45,6 +45,6 @@ class CategoryCrudController extends CrudController
 
     protected function setupUpdateOperation()
     {
-        $this->setupCreateOperation();
+        CRUD::field('description');
     }
 }

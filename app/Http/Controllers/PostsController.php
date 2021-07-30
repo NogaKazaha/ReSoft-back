@@ -95,6 +95,31 @@ class PostsController extends Controller
         else {
             $post = Post::find($id);
             $post->update($request->all());
+            if($request->input('categories')) {
+                DB::table('posts_categories_ids')->where('post_id', $id)->delete();
+                $new_categories = $request->input('categories');
+                $categories_arr = explode(' ',$new_categories);
+                foreach($categories_arr as $category) {
+                    if(Category::where('title', $category)->exists()) {
+                        continue;
+                    }
+                    $creditianals = [
+                        'title' => $category,
+                        'description' => 'Will be edit soon by admin'
+                    ];
+                    Category::create($creditianals);
+                }
+                foreach($categories_arr as $category) {
+                    $cat_id = Category::where('title', $category)->value('id');
+                    $creditianals = [
+                        'post_id' => $id,
+                        'category_id' => $cat_id,
+                        'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
+                        'updated_at' => Carbon::now()->format('Y-m-d H:i:s')
+                    ];
+                    DB::table('posts_categories_ids')->insert($creditianals);
+                }
+            }
             $subscribers = DB::table('subscriptions')->where('post_id', $id)->pluck("user_id");
             foreach($subscribers as $subscriber_id) {
                 $subscriber = User::find($subscriber_id);

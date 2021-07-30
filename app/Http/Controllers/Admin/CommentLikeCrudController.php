@@ -6,11 +6,8 @@ use App\Http\Requests\CommentLikeRequest;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 
-/**
- * Class CommentLikeCrudController
- * @package App\Http\Controllers\Admin
- * @property-read \Backpack\CRUD\app\Library\CrudPanel\CrudPanel $crud
- */
+use Illuminate\Support\Facades\DB;
+
 class CommentLikeCrudController extends CrudController
 {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
@@ -18,12 +15,9 @@ class CommentLikeCrudController extends CrudController
     use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
+    use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation { update as traitUpdate; }
+    use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation { destroy as traitDestroy; }
 
-    /**
-     * Configure the CrudPanel object. Apply settings to all operations.
-     * 
-     * @return void
-     */
     public function setup()
     {
         CRUD::setModel(\App\Models\CommentLike::class);
@@ -31,50 +25,104 @@ class CommentLikeCrudController extends CrudController
         CRUD::setEntityNameStrings('comment like', 'comment likes');
     }
 
-    /**
-     * Define what happens when the List operation is loaded.
-     * 
-     * @see  https://backpackforlaravel.com/docs/crud-operation-list-entries
-     * @return void
-     */
     protected function setupListOperation()
     {
-        CRUD::setFromDb(); // columns
-
-        /**
-         * Columns can be defined using the fluent syntax or array syntax:
-         * - CRUD::column('price')->type('number');
-         * - CRUD::addColumn(['name' => 'price', 'type' => 'number']); 
-         */
+        CRUD::removeButton('delete');
+        CRUD::column('id');
+        CRUD::column('user_id');
+        CRUD::column('comment_id');
+        CRUD::column('type');
     }
 
-    /**
-     * Define what happens when the Create operation is loaded.
-     * 
-     * @see https://backpackforlaravel.com/docs/crud-operation-create
-     * @return void
-     */
     protected function setupCreateOperation()
     {
         CRUD::setValidation(CommentLikeRequest::class);
 
-        CRUD::setFromDb(); // fields
+        CRUD::removeButton('delete');
+        CRUD::setFromDb();
+        CRUD::modifyField('type', [
+            'type' => 'enum',
+        ]); 
 
-        /**
-         * Fields can be defined using the fluent syntax or array syntax:
-         * - CRUD::field('price')->type('number');
-         * - CRUD::addField(['name' => 'price', 'type' => 'number'])); 
-         */
     }
 
-    /**
-     * Define what happens when the Update operation is loaded.
-     * 
-     * @see https://backpackforlaravel.com/docs/crud-operation-update
-     * @return void
-     */
     protected function setupUpdateOperation()
     {
-        $this->setupCreateOperation();
+        CRUD::addField([
+            'name' => 'type',
+            'type' => 'enum',
+            'lable' => 'Type'
+        ]);
+    }
+
+    public function store() {
+        $author_id = request()->user_id;
+        $type = request()->type;
+        $comment_rate = DB::table('comments')->where('id', request()->comment_id)->value('rating');
+        $comment_creator = DB::table('comments')->where('id', request()->comment_id)->value('user_id');
+        $creator_rate = DB::table('users')->where('id', $comment_creator)->value('rating');
+        if($type == 'like') {
+            DB::table('comment_likes')->insert([
+                'comment_id' => request()->comment_id,
+                'user_id' => $author_id,
+                'type' => 'like'
+            ]);
+            DB::table('comments')->where('id', request()->comment_id)->update([
+                'rating' => $comment_rate + 1
+            ]);
+            DB::table('users')->where('id', $comment_creator)->update([
+                'rating' => $creator_rate + 1
+            ]);
+        }
+        else {
+            DB::table('comment_likes')->insert([
+                'comment_id' => request()->comment_id,
+                'user_id' => $author_id,
+                'type' => 'dislike'
+            ]);
+            DB::table('comments')->where('id', request()->comment_id)->update([
+                'rating' => $comment_rate - 1
+            ]);
+            DB::table('users')->where('id', $comment_creator)->update([
+                'rating' => $creator_rate - 1
+            ]);
+        }
+        return redirect('/admin/comment-like');
+    }
+
+    public function update()
+    {
+        $comment_like = CRUD::getCurrentEntry();
+        $response = $this->traitUpdate();
+        $comment_like->update(request()->all());
+        if($comment_like->type == 'like') {
+            DB::table('comment_likes')->where('comment_id', $comment_like->comment_id)->where('user_id', $comment_like->user_id)->update([
+                'type' => 'like'
+            ]);
+            $comment_rate = DB::table('comments')->where('id', $comment_like->comment_id)->value('rating');
+            DB::table('comments')->where('id', $comment_like->comment_id)->update([
+                'rating' => $comment_rate + 2
+            ]);
+            $user_id =  DB::table('comments')->where('id', $comment_like->comment_id)->value('user_id');
+            $user_rating = DB::table('users')->where('id', $user_id)->value('rating');
+            DB::table('users')->where('id', $user_id)->update([
+                'rating' => $user_rating + 2
+            ]);
+        }
+        else {
+            DB::table('comment_likes')->where('comment_id', $comment_like->comment_id)->where('user_id', $comment_like->user_id)->update([
+                'type' => 'dislike'
+            ]);
+            $comment_rate = DB::table('comments')->where('id', $comment_like->comment_id)->value('rating');
+            DB::table('comments')->where('id', $comment_like->comment_id)->update([
+                'rating' => $comment_rate - 2
+            ]);
+            $user_id =  DB::table('comments')->where('id', $comment_like->comment_id)->value('user_id');
+            $user_rating = DB::table('users')->where('id', $user_id)->value('rating');
+            DB::table('users')->where('id', $user_id)->update([
+                'rating' => $user_rating - 2
+            ]);
+        }
+        return $response;
     }
 }

@@ -39,7 +39,6 @@ class CommentCrudController extends CrudController
         $minus = DB::table("comment_likes")->where("comment_id", $comment->id)->where("type", 'dislike')->count();
         $comment->likes = $plus - $minus;
         CRUD::column('id');
-        CRUD::column('user');
         CRUD::column('post_id');
         CRUD::column('content');
         CRUD::column('likes');
@@ -62,6 +61,6 @@ class CommentCrudController extends CrudController
 
     protected function setupUpdateOperation()
     {
-        $this->setupCreateOperation();
+        CRUD::field('content');
     }
 }

@@ -6,11 +6,11 @@ use App\Http\Requests\PostRequest;
 use Backpack\CRUD\app\Http\Controllers\CrudController;
 use Backpack\CRUD\app\Library\CrudPanel\CrudPanelFacade as CRUD;
 
-/**
- * Class PostCrudController
- * @package App\Http\Controllers\Admin
- * @property-read \Backpack\CRUD\app\Library\CrudPanel\CrudPanel $crud
- */
+use App\Models\Category;
+use App\Models\Post;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+
 class PostCrudController extends CrudController
 {
     use \Backpack\CRUD\app\Http\Controllers\Operations\ListOperation;
@@ -18,12 +18,8 @@ class PostCrudController extends CrudController
     use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\DeleteOperation;
     use \Backpack\CRUD\app\Http\Controllers\Operations\ShowOperation;
+    use \Backpack\CRUD\app\Http\Controllers\Operations\UpdateOperation { update as traitUpdate; }
 
-    /**
-     * Configure the CrudPanel object. Apply settings to all operations.
-     * 
-     * @return void
-     */
     public function setup()
     {
         CRUD::setModel(\App\Models\Post::class);
@@ -31,33 +27,37 @@ class PostCrudController extends CrudController
         CRUD::setEntityNameStrings('post', 'posts');
     }
 
-    /**
-     * Define what happens when the List operation is loaded.
-     * 
-     * @see  https://backpackforlaravel.com/docs/crud-operation-list-entries
-     * @return void
-     */
     protected function setupListOperation()
     {
+        CRUD::column('id');
         CRUD::column('user_id');
         CRUD::column('title');
         CRUD::column('content');
         CRUD::column('categories');
         CRUD::column('status');
-
-        /**
-         * Columns can be defined using the fluent syntax or array syntax:
-         * - CRUD::column('price')->type('number');
-         * - CRUD::addColumn(['name' => 'price', 'type' => 'number']); 
-         */
     }
 
-    /**
-     * Define what happens when the Create operation is loaded.
-     * 
-     * @see https://backpackforlaravel.com/docs/crud-operation-create
-     * @return void
-     */
+    protected function setupShowOperation()
+    {
+        CRUD::column('id');
+        $posts = CRUD::getCurrentEntry();
+        $plus = DB::table("post_likes")->where("post_id", $posts->id)->where("type", 'like')->count();
+        $minus = DB::table("post_likes")->where("post_id", $posts->id)->where("type", 'dislike')->count();
+        $posts->likes = $plus - $minus;
+        CRUD::column('user_id');
+        CRUD::column('title');
+        CRUD::column('content');
+        CRUD::column('categories');
+        CRUD::column('status');
+        CRUD::column('likes');
+        CRUD::modifyColumn('likes', [
+            'label' => 'Rating',
+            'type' => 'integer',
+            'name' => 'likes',
+        ]);
+        CRUD::column('created_at');
+    }
+
     protected function setupCreateOperation()
     {
         CRUD::setValidation(PostRequest::class);
@@ -67,22 +67,85 @@ class PostCrudController extends CrudController
         CRUD::field('content');
         CRUD::field('categories');
         CRUD::field('status');
-
-        /**
-         * Fields can be defined using the fluent syntax or array syntax:
-         * - CRUD::field('price')->type('number');
-         * - CRUD::addField(['name' => 'price', 'type' => 'number'])); 
-         */
+        CRUD::modifyField('status', [
+            'type' => 'enum',
+        ]);
     }
 
-    /**
-     * Define what happens when the Update operation is loaded.
-     * 
-     * @see https://backpackforlaravel.com/docs/crud-operation-update
-     * @return void
-     */
     protected function setupUpdateOperation()
     {
-        $this->setupCreateOperation();
+        CRUD::field('title');
+        CRUD::field('content');
+        CRUD::field('categories');
+        CRUD::field('status');
+        CRUD::modifyField('status', [
+            'type' => 'enum',
+        ]);
+    }
+
+    public function store() {
+        $post = Post::create(request()->all());
+        $categories_arr = explode(' ',request()->categories);
+            foreach($categories_arr as $category) {
+                if(Category::where('title', $category)->exists()) {
+                    continue;
+                }
+                $creditianals = [
+                    'title' => $category,
+                    'description' => 'Will be edit soon by admin'
+                ];
+                Category::create($creditianals);
+            }
+            foreach($categories_arr as $category) {
+                $id = Category::where('title', $category)->value('id');
+                $creditianals = [
+                    'post_id' => $post->id,
+                    'category_id' => $id,
+                    'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
+                    'updated_at' => Carbon::now()->format('Y-m-d H:i:s')
+                ];
+                DB::table('posts_categories_ids')->insert($creditianals);
+            }
+
+        return redirect('/admin/post/');
+    }
+
+    public function update()
+    {
+        request()->validate([
+            'status' => 'in:active,inactive'
+        ]);
+
+        $post = CRUD::getCurrentEntry();
+        $response = $this->traitUpdate();
+        $post->update(request()->all());
+        if(request()->categories){
+            DB::table('posts_categories_ids')->where('post_id', $post->id)->delete();
+            $new_categories = request()->categories;
+                $categories_arr = explode(' ',$new_categories);
+                foreach($categories_arr as $category) {
+                    if(Category::where('title', $category)->exists()) {
+                        continue;
+                    }
+                    $creditianals = [
+                        'title' => $category,
+                        'description' => 'Will be edit soon by admin'
+                    ];
+                    Category::create($creditianals);
+                }
+                foreach($categories_arr as $category) {
+                    $cat_id = Category::where('title', $category)->value('id');
+                    $creditianals = [
+                        'post_id' => $post->id,
+                        'category_id' => $cat_id,
+                        'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
+                        'updated_at' => Carbon::now()->format('Y-m-d H:i:s')
+                    ];
+                    DB::table('posts_categories_ids')->insert($creditianals);
+                }
+        }
+
+        return $response;
+
     }
 }
