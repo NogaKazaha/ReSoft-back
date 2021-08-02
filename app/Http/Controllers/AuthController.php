@@ -11,6 +11,7 @@ use App\Mail\PasswordResetMail;
 
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class AuthController extends Controller
 {
@@ -20,7 +21,6 @@ class AuthController extends Controller
             'password' => Hash::make($request->input('password')),
             'name' => $request->input('name'),
             'email' => $request->input('email'),
-            /*'avatar'=> $request->input('avatar')*/
         ]);
         return response([
             'message' => 'Succesfuly registered',
@@ -29,7 +29,7 @@ class AuthController extends Controller
     }
     public function login() {
         $login_data = request()->only(['username', 'password']);
-        $token = JWTAuth::attempt($login_data);
+        $token = JWTAuth::attempt($login_data, ['exp' => Carbon::now()->addDays(7)->timestamp]);
         if (!$token) {
             return response([
                 'message' => 'Incorrect login data!'
