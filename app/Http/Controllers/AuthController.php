@@ -39,9 +39,11 @@ class AuthController extends Controller
             DB::table('users')->where('username', $login_data['username'])->update([
                 'remember_token' => $token
             ]);
+            $user_id = DB::table('users')->where('username', $login_data['username'])->value('id');
             return response([
                 'message' => 'Succesfuly loged in',
                 'token' => $token,
+                'user_id' => $user_id
             ]);
         }
     }
@@ -77,13 +79,19 @@ class AuthController extends Controller
                 'email' => $email,
                 'token' => $new_token
             ]);
-            $details = [
-                'title' => 'Password Reset Mail',
+            $details_api = [
+                'title' => 'Password Reset Mail for API',
                 'body' => 'Your link to reset password: http://127.0.0.1:8000/api/auth/reset_password/'.$new_token
             ];
-            Mail::to($reset_password_data)->send(new PasswordResetMail($details));
+            $details_react = [
+                'title' => 'Password Reset Mail for React App',
+                'body' => 'Your link to reset password: http://localhost:3000/password_reset/'.$new_token
+            ];
+            Mail::to($reset_password_data)->send(new PasswordResetMail($details_api));
+            Mail::to($reset_password_data)->send(new PasswordResetMail($details_react));
             return response([
                 'message' => 'Your password reset link was sent',
+                'reset_token' => $new_token
             ]);
         }
     }
