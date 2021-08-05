@@ -47,8 +47,14 @@ class UserController extends Controller
 
     public function update(Request $request, $id)
     {
+        $user = $this->checkLogIn($request);
+        if(!$user) {
+            return response([
+                'message' => 'User is not logged in'
+            ]);
+        }
         $user = JWTAuth::toUser(JWTAuth::getToken());
-        if($user && $this->checkAdmin($request)) {
+        if($user && $user->id == $id) {
             $user = User::find($id);
             $user->update($request->all());
             return response([
@@ -65,8 +71,14 @@ class UserController extends Controller
 
     public function destroy(Request $request, $id)
     {
+        $user = $this->checkLogIn($request);
+        if(!$user) {
+            return response([
+                'message' => 'User is not logged in'
+            ]);
+        }
         $user = JWTAuth::toUser(JWTAuth::getToken());
-        if($user && $this->checkAdmin($request)) {
+        if($user && $user->id == $id) {
             User::destroy($id);
             return response([
                 'message' => 'User succesfuly deleted'
