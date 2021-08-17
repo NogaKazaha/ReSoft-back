@@ -14,7 +14,7 @@ class CreateUsersTable extends Migration
             $table->string('password');
             $table->string('name');
             $table->string('email')->unique();
-            $table->string('avatar')->default('/avatars/default.jpg');
+            $table->string('avatar')->default('avatars/default.jpg');
             $table->integer('rating')->default(0);
             $table->enum('role', ['user' , 'admin'])->default('user');
             $table->longText('remember_token')->nullable();

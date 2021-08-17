@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             'email' => "nogakazahawork@gmail.com",
             'password' => Hash::make('qweasdzxc'),
             'role' => "admin",
+            'rating' => 3,
             'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::now()->format('Y-m-d H:i:s')
         ]);
@@ -32,6 +33,7 @@ class DatabaseSeeder extends Seeder
             'email' => "user1@gmail.com",
             'password' => Hash::make('user1'),
             'role' => "user",
+            'rating' => 0,
             'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::now()->format('Y-m-d H:i:s')
         ]);
@@ -41,6 +43,7 @@ class DatabaseSeeder extends Seeder
             'email' => "user2@gmail.com",
             'password' => Hash::make('user2'),
             'role' => "user",
+            'rating' => 0,
             'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::now()->format('Y-m-d H:i:s')
         ]);
@@ -50,6 +53,7 @@ class DatabaseSeeder extends Seeder
             'email' => "user3@gmail.com",
             'password' => Hash::make('user3'),
             'role' => "user",
+            'rating' => 0,
             'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::now()->format('Y-m-d H:i:s')
         ]);
@@ -59,6 +63,7 @@ class DatabaseSeeder extends Seeder
             'email' => "user4@gmail.com",
             'password' => Hash::make('user4'),
             'role' => "user",
+            'rating' => 0,
             'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
             'updated_at' => Carbon::now()->format('Y-m-d H:i:s')
         ]);
