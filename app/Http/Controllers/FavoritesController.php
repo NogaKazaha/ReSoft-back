@@ -90,4 +90,8 @@ class FavoritesController extends Controller
         }
         return $all_favorites;
     }
+    public function get_user_fav_ids(Request $request, $id) {
+        $favorites = DB::table('favorites')->where('user_id', $id)->pluck('post_id');
+        return $favorites;
+    }
 }

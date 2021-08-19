@@ -117,4 +117,10 @@ class CommentsController extends Controller
         }
         return $sort_by;
     }
+    public function show_comments_to_post($id) {
+        return DB::table('comments')->where('post_id', $id)->get();
+    }
+    public function get_authors_ids_for_post($id) {
+        return DB::table('comments')->where('post_id', $id)->pluck('user_id');
+    }
 }

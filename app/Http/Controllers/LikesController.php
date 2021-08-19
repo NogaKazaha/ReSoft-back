@@ -184,4 +184,12 @@ class LikesController extends Controller
             'message' => 'Like removed'
         ]);
     }
+    public function show_user_likes(Request $request, $id) {
+        $likes = DB::table('post_likes')->where('user_id', $id)->pluck('post_id');
+        return $likes;
+    }
+    public function show_user_likes_comment(Request $request, $id) {
+        $likes = DB::table('comment_likes')->where('user_id', $id)->pluck('comment_id');
+        return $likes;
+    }
 }

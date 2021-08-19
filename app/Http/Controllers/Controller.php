@@ -15,7 +15,7 @@ class Controller extends BaseController
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
     public function checkLogIn(Request $request)
     {
-        // $token = explode(" ", $request->header("Authorization"))[1]; - For API only back
+        // $token = explode(" ", $request->header("Authorization"))[1];
         $token = $request->header("Authorization");
         $token = trim($token, '\"');
         $user = DB::table('users')->where("remember_token", $token);
@@ -28,7 +28,7 @@ class Controller extends BaseController
     }
     public function checkAdmin(Request $request)
     {
-        // $token = explode(" ", $request->header("Authorization"))[1]; - For API only back
+        // $token = explode(" ", $request->header("Authorization"))[1]; 
         $token = $request->header("Authorization");
         $token = trim($token, '\"');
         $user_role = DB::table('users')->where("remember_token", $token)->value('role');

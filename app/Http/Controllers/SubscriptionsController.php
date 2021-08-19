@@ -65,4 +65,8 @@ class SubscriptionsController extends Controller
             }
         }
     }
+    public function get_user_subs_ids(Request $request, $id) {
+        $favorites = DB::table('subscriptions')->where('user_id', $id)->pluck('post_id');
+        return $favorites;
+    }
 }
