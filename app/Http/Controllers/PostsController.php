@@ -218,4 +218,8 @@ class PostsController extends Controller
         }
         return $filter_by;
     }
+
+    public function show_user_posts_ids($id) {
+        return DB::table('posts')->where('user_id', $id)->pluck('id');
+    }
 }

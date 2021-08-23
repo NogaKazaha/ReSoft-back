@@ -24,6 +24,7 @@ Route::prefix('auth')->group(function() {
 Route::prefix('posts')->group(function() {
     Route::get('/show_all', 'App\Http\Controllers\PostsController@index');
     Route::get('/show/{id}', 'App\Http\Controllers\PostsController@show');
+    Route::get('/show/{id}/ids', 'App\Http\Controllers\PostsController@show_user_posts_ids');
     Route::post('/create', 'App\Http\Controllers\PostsController@store');
     Route::delete('/delete/{id}', 'App\Http\Controllers\PostsController@destroy');
     Route::patch('/update/{id}', 'App\Http\Controllers\PostsController@update');
