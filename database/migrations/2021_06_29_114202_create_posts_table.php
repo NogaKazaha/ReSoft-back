@@ -11,10 +11,10 @@ class CreatePostsTable extends Migration
         Schema::create('posts', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
-            $table->string('title');
-            $table->string('content');
+            $table->string('title', 256);
+            $table->string('content', 6000);
             $table->enum('status', ['active', 'inactive'])->default('active');
-            $table->string('categories');
+            $table->string('categories', 1024);
             $table->integer('rating')->default(0);
             $table->foreign('user_id')->references('id')->on('users')->onUpdate('cascade')->onDelete('cascade');
             $table->timestamps();

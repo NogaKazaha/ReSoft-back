@@ -47,6 +47,7 @@ Route::prefix('comments')->group(function() {
     Route::get('/show_all', 'App\Http\Controllers\CommentsController@index');
     Route::get('/show/{id}', 'App\Http\Controllers\CommentsController@show');
     Route::get('/show/{id}/post', 'App\Http\Controllers\CommentsController@show_comments_to_post');
+    Route::get('/show/{id}/user', 'App\Http\Controllers\CommentsController@show_user_comment');
     Route::get('/show/{id}/post/authors', 'App\Http\Controllers\CommentsController@get_authors_ids_for_post');
     Route::post('/{id}/create', 'App\Http\Controllers\CommentsController@store');
     Route::delete('/delete/{id}', 'App\Http\Controllers\CommentsController@destroy');

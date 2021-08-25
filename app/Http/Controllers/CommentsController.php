@@ -118,9 +118,12 @@ class CommentsController extends Controller
         return $sort_by;
     }
     public function show_comments_to_post($id) {
-        return DB::table('comments')->where('post_id', $id)->join('users', 'users.id' , '=', 'comments.user_id')->get();
+        return DB::table('comments')->where('post_id', $id)->join('users', 'users.id' , '=', 'comments.user_id')->select('comments.id', 'users.avatar', 'users.username', 'comments.user_id', 'comments.content', 'comments.rating')->get();
     }
     public function get_authors_ids_for_post($id) {
         return DB::table('comments')->where('post_id', $id)->pluck('user_id');
+    }
+    public function show_user_comment($id) {
+        return DB::table('comments')->where('user_id', $id)->pluck('id');
     }
 }
