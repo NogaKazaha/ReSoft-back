@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Models\User;
+use App\Filter\PostsFilter;
 use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
 
@@ -19,7 +20,7 @@ class PostsController extends Controller
         $all_posts = Post::all();
         $all_posts = $this->sort_by($request, $all_posts);
         $all_posts = $this->filter_by($request, $all_posts);
-        return $all_posts;
+        return $all_posts;    
     }
 
     public function store(Request $request)
@@ -159,9 +160,11 @@ class PostsController extends Controller
     public function send_notification(User $user, $post_id)
     {
         $link = 'http://127.0.0.1:8000/api/posts/show/'.$post_id;
+        $link_react = "http://localhost:3000/posts/".$post_id;
         $data = [
             'username' => $user->username,
-            'link' => $link
+            'link' => $link,
+            'link_react' => $link_react
         ];
         Mail::send('notification', $data, function ($message) use ($user) {
             $message->to($user->email);
@@ -172,24 +175,32 @@ class PostsController extends Controller
     public function sort_by(Request $request, $posts) {
         if($request->input('sort_by') == 'rating') {
             if($request->input('order_by') == 'desc') {
-                $sort_by = $posts->sortByDesc('rating');
+                $sort_by = $posts->sortByDesc('rating')->values();
             }
             else {
-                $sort_by = $posts->sortBy('rating');
+                $sort_by = $posts->sortBy('rating')->values();
             }
         }
         else if($request->input('sort_by') == 'date') {
             if($request->input('order_by') == 'desc') {
-                $sort_by = $posts->sortByDesc('updated_at');
+                $sort_by = $posts->sortByDesc('updated_at')->values();
             }
             else {
-                $sort_by = $posts->sortBy('updated_at');
+                $sort_by = $posts->sortBy('updated_at')->values();
             }
+        }
+        else if($request->input('sort_by') == 'status') {
+            $sort_by = $posts->filter(function ($post) use ($request) {
+                if ($post->status == $request->input('status')) {
+                    return $post;
+                }
+            })->values();
         }
         else {
             $sort_by = $posts;
         }
-        return $sort_by;
+        $new_sort[] = $sort_by;
+        return $new_sort;
     }
 
     public function filter_by(Request $request, $posts) {
@@ -221,5 +232,8 @@ class PostsController extends Controller
 
     public function show_user_posts_ids($id) {
         return DB::table('posts')->where('user_id', $id)->pluck('id');
+    }
+    public function search_by($value) {
+        return DB::table('posts')->where('title', 'LIKE', '%' . $value . '%')->orWhere('content', 'LIKE', '%' . $value . '%')->get();
     }
 }

@@ -22,7 +22,8 @@ Route::prefix('auth')->group(function() {
 });
 
 Route::prefix('posts')->group(function() {
-    Route::get('/show_all', 'App\Http\Controllers\PostsController@index');
+    Route::post('/show_all', 'App\Http\Controllers\PostsController@index');
+    Route::get('/search/{filter}', 'App\Http\Controllers\PostsController@search_by');
     Route::get('/show/{id}', 'App\Http\Controllers\PostsController@show');
     Route::get('/show/{id}/ids', 'App\Http\Controllers\PostsController@show_user_posts_ids');
     Route::post('/create', 'App\Http\Controllers\PostsController@store');
@@ -77,6 +78,7 @@ Route::prefix('favorites')->group(function() {
 });
 Route::prefix('subscriptions')->group(function() {
     Route::get('/show/{id}', 'App\Http\Controllers\SubscriptionsController@show_user_subscriptions');
+    Route::get('/show_all/{id}', 'App\Http\Controllers\SubscriptionsController@show_user_subs');
     Route::get('/show/{id}/ids', 'App\Http\Controllers\SubscriptionsController@get_user_subs_ids');
     Route::post('/add/{id}', 'App\Http\Controllers\SubscriptionsController@add_to_subscriptions');
     Route::delete('/delete/{id}', 'App\Http\Controllers\SubscriptionsController@delete_from_subscriptions');

@@ -11,6 +11,7 @@
     Hello, {{$username}}!<br><br>
     You have new notification on subscribed post!<br>
     Go ahead and check it: {{$link}}<br>
+    Link for site: {{$link_react}}<br>
     </p>
 </body>
 </html>

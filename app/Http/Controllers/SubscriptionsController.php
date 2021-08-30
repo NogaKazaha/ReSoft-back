@@ -69,4 +69,13 @@ class SubscriptionsController extends Controller
         $favorites = DB::table('subscriptions')->where('user_id', $id)->pluck('post_id');
         return $favorites;
     }
+    public function show_user_subs($id) {
+        $all_subs = [];
+        $post_ids = DB::table('subscriptions')->where('user_id', $id)->pluck('post_id');
+        foreach($post_ids as $id) {
+            $item = (object)DB::table('posts')->where('id', $id)->get();
+            array_push($all_subs, $item[0]);
+        }
+        return $all_subs;
+    }
 }

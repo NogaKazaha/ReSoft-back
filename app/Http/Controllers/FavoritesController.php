@@ -11,15 +11,12 @@ class FavoritesController extends Controller
 {
     public function show_user_favorites($id) {
         $all_favorites = [];
-        $username = DB::table('users')->where('id', $id)->value('username');
         $post_ids = DB::table('favorites')->where('user_id', $id)->pluck('post_id');
         foreach($post_ids as $id) {
-            $item = DB::table('posts')->where('id', $id)->get();
-            array_push($all_favorites, $item);
+            $item = (object)DB::table('posts')->where('id', $id)->get();
+            array_push($all_favorites, $item[0]);
         }
-        return response([
-            'Favorites of user '.$username => $all_favorites
-        ]);
+        return $all_favorites;
     }
 
     public function add_to_favorites(Request $request, $id) {
